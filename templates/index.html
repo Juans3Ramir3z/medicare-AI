@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Médico - MediCare AI</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: rgba(255,255,255,0.1);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+
+        .header h1 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            width: 100%;
+        }
+
+        .chat-messages {
+            flex: 1;
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            overflow-y: auto;
+            max-height: 500px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            animation: slideIn 0.3s ease;
+        }
+
+        .message.user {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            margin-left: 50px;
+            text-align: right;
+        }
+
+        .message.ai {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            margin-right: 50px;
+        }
+
+        .message-header {
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .urgency-indicator {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .urgency-baja { background: #d4edda; color: #155724; }
+        .urgency-media { background: #fff3cd; color: #856404; }
+        .urgency-alta { background: #f8d7da; color: #721c24; }
+
+        .chat-input-container {
+            display: flex;
+            gap: 10px;
+            background: rgba(255,255,255,0.95);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 16px;
+            resize: vertical;
+            min-height: 50px;
+            max-height: 120px;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .send-btn {
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .typing-indicator {
+            display: none;
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            margin: 10px 0;
+        }
+
+        .suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .suggestion-chip {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 14px;
+        }
+
+        .suggestion-chip:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-1px);
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .chat-container {
+                padding: 10px;
+            }
+            
+            .message.user {
+                margin-left: 20px;
+            }
+            
+            .message.ai {
+                margin-right: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><i class="fas fa-comments"></i> Chat Médico IA</h1>
+        <button class="nav-btn" onclick="location.href='/'">
+            <i class="fas fa-home"></i> Inicio
+        </button>
+    </div>
+
+    <div class="chat-container">
+        <div class="suggestions">
+            <button class="suggestion-chip" onclick="enviarSugerencia('Tengo dolor de cabeza desde esta mañana')">
+                💊 Dolor de cabeza
+            </button>
+            <button class="suggestion-chip" onclick="enviarSugerencia('Me siento con fiebre y cansancio')">
+                🌡️ Fiebre y cansancio
+            </button>
+            <button class="suggestion-chip" onclick="enviarSugerencia('Tengo problemas para dormir')">
+                😴 Problemas de sueño
+            </button>
+            <button class="suggestion-chip" onclick="enviarSugerencia('Siento dolor en las articulaciones')">
+                🦴 Dolor articular
+            </button>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="message ai">
+                <div class="message-header">
+                    <i class="fas fa-robot"></i> MediCare AI
+                </div>
+                <div>¡Hola! Soy tu asistente médico inteligente. Puedo ayudarte a analizar tus síntomas y ofrecerte orientación médica básica. 
+                
+                <br><br><strong>⚠️ Importante:</strong> Mis consejos no reemplazan la consulta médica profesional. Si tienes una emergencia, llama al 911 inmediatamente.
+                
+                <br><br>¿Cómo te sientes hoy? Describe tus síntomas...</div>
+            </div>
+        </div>
+
+        <div class="typing-indicator" id="typingIndicator">
+            <i class="fas fa-spinner fa-spin"></i> MediCare AI está escribiendo...
+        </div>
+
+        <div class="chat-input-container">
+            <textarea 
+                id="chatInput" 
+                class="chat-input" 
+                placeholder="Describe tus síntomas aquí... Por ejemplo: 'Tengo dolor de cabeza y me siento mareado'"
+                onkeypress="manejarEnter(event)"
+            ></textarea>
+            <button class="send-btn" onclick="enviarMensaje()" id="sendBtn">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let conversacionActiva = false;
+
+        function enviarSugerencia(texto) {
+            document.getElementById('chatInput').value = texto;
+            enviarMensaje();
+        }
+
+        function manejarEnter(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                enviarMensaje();
+            }
+        }
+
+        function enviarMensaje() {
+            const input = document.getElementById('chatInput');
+            const mensaje = input.value.trim();
+            
+            if (!mensaje || conversacionActiva) return;
+
+            // Agregar mensaje del usuario
+            agregarMensaje(mensaje, 'user');
+            input.value = '';
+            
+            // Mostrar indicador de escritura
+            mostrarTyping(true);
+            conversacionActiva = true;
+            document.getElementById('sendBtn').disabled = true;
+
+            // Enviar a la API
+            fetch('/api/consulta', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ sintomas: mensaje })
+            })
+            .then(response => response.json())
+            .then(data => {
+                mostrarTyping(false);
+                
+                if (data.error) {
+                    agregarMensaje('Lo siento, ocurrió un error. Por favor intenta de nuevo.', 'ai', 'baja');
+                } else {
+                    agregarMensaje(data.respuesta, 'ai', data.urgencia);
+                    
+                    // Agregar sugerencias de seguimiento si es necesario
+                    if (data.urgencia === 'alta') {
+                        setTimeout(() => {
+                            agregarMensaje('🚨 RECOMENDACIÓN URGENTE: Debido a la naturaleza de tus síntomas, te recomiendo encarecidamente buscar atención médica inmediata o llamar al 911.', 'ai', 'alta');
+                        }, 1000);
+                    }
+                }
+                
+                conversacionActiva = false;
+                document.getElementById('sendBtn').disabled = false;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                mostrarTyping(false);
+                agregarMensaje('Lo siento, no pude procesar tu consulta. Verifica tu conexión e intenta de nuevo.', 'ai', 'baja');
+                conversacionActiva = false;
+                document.getElementById('sendBtn').disabled = false;
+            });
+        }
+
+        function agregarMensaje(texto, tipo, urgencia = null) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${tipo}`;
+            
+            let header = '';
+            if (tipo === 'user') {
+                header = '<div class="message-header"><i class="fas fa-user"></i> Tú</div>';
+            } else {
+                let urgencyIndicator = '';
+                if (urgencia) {
+                    const urgencyLabels = {
+                        'baja': '✅ Normal',
+                        'media': '⚠️ Atención',
+                        'alta': '🚨 Urgente'
+                    };
+                    urgencyIndicator = `<span class="urgency-indicator urgency-${urgencia}">${urgencyLabels[urgencia]}</span>`;
+                }
+                header = `<div class="message-header"><i class="fas fa-robot"></i> MediCare AI ${urgencyIndicator}</div>`;
+            }
+            
+            messageDiv.innerHTML = `${header}<div>${texto}</div>`;
+            chatMessages.appendChild(messageDiv);
+            
+            // Scroll al final
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function mostrarTyping(mostrar) {
+            const typingIndicator = document.getElementById('typingIndicator');
+            typingIndicator.style.display = mostrar ? 'block' : 'none';
+            
+            if (mostrar) {
+                const chatMessages = document.getElementById('chatMessages');
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        }
+
+        // Auto-focus en el input
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('chatInput').focus();
+        });
+    </script>
+</body>
+</html>
