@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat Médico - MediCare AI</title>
+    <title>Chat Médico Avanzado - MediCare AI v2.0</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
@@ -21,18 +22,29 @@
         }
 
         .header {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
             padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
         .header h1 {
             display: flex;
             align-items: center;
             gap: 10px;
+            font-size: 1.5rem;
+        }
+
+        .version-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: bold;
         }
 
         .nav-btn {
@@ -43,20 +55,117 @@
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
 
         .nav-btn:hover {
             background: rgba(255,255,255,0.3);
+            transform: translateY(-1px);
+        }
+
+        .main-container {
+            flex: 1;
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            width: 100%;
+            gap: 20px;
+        }
+
+        .sidebar {
+            width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .sidebar-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .sidebar-card h3 {
+            margin-bottom: 15px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quick-symptoms {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+
+        .symptom-btn {
+            background: linear-gradient(135deg, #f8f9ff, #e6f3ff);
+            border: 2px solid #e0e7ff;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .symptom-btn:hover {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .urgency-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-left: auto;
+        }
+
+        .urgency-baja { background: #22c55e; }
+        .urgency-media { background: #f59e0b; }
+        .urgency-alta { background: #ef4444; }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 15px 12px 40px;
+            border: 2px solid #e0e7ff;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
         }
 
         .chat-container {
             flex: 1;
             display: flex;
             flex-direction: column;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            width: 100%;
         }
 
         .chat-messages {
@@ -66,15 +175,17 @@
             padding: 20px;
             margin-bottom: 20px;
             overflow-y: auto;
-            max-height: 500px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-height: 600px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
         }
 
         .message {
-            margin-bottom: 15px;
-            padding: 15px;
-            border-radius: 10px;
-            animation: slideIn 0.3s ease;
+            margin-bottom: 20px;
+            padding: 18px;
+            border-radius: 12px;
+            animation: slideIn 0.4s ease;
+            line-height: 1.6;
         }
 
         .message.user {
@@ -82,72 +193,135 @@
             color: white;
             margin-left: 50px;
             text-align: right;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
         }
 
         .message.ai {
             background: #f8f9fa;
             border: 2px solid #e9ecef;
             margin-right: 50px;
+            position: relative;
+            white-space: pre-wrap;
+        }
+
+        .message.ai.urgent {
+            border-color: #ef4444;
+            background: linear-gradient(135deg, #fef2f2, #ffffff);
+        }
+
+        .message.ai.warning {
+            border-color: #f59e0b;
+            background: linear-gradient(135deg, #fffbeb, #ffffff);
         }
 
         .message-header {
-            font-weight: bold;
-            margin-bottom: 8px;
+            font-weight: 600;
+            margin-bottom: 12px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            font-size: 0.95rem;
         }
 
-        .urgency-indicator {
+        .message-content {
+            font-size: 15px;
+        }
+
+        .message-content strong {
+            color: #1f2937;
+            font-weight: 600;
+        }
+
+        .confidence-badge {
+            background: rgba(34, 197, 94, 0.1);
+            color: #16a34a;
             padding: 4px 8px;
             border-radius: 12px;
-            font-size: 0.8em;
-            font-weight: bold;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: auto;
         }
 
-        .urgency-baja { background: #d4edda; color: #155724; }
-        .urgency-media { background: #fff3cd; color: #856404; }
-        .urgency-alta { background: #f8d7da; color: #721c24; }
+        .urgency-badge {
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .urgency-baja-badge { 
+            background: #dcfce7; 
+            color: #166534; 
+        }
+        .urgency-media-badge { 
+            background: #fef3c7; 
+            color: #92400e; 
+        }
+        .urgency-alta-badge { 
+            background: #fecaca; 
+            color: #991b1b;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
 
         .chat-input-container {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             background: rgba(255,255,255,0.95);
             padding: 20px;
             border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
         }
 
         .chat-input {
             flex: 1;
-            padding: 15px;
+            padding: 16px;
             border: 2px solid #e9ecef;
-            border-radius: 10px;
+            border-radius: 12px;
             font-size: 16px;
             resize: vertical;
-            min-height: 50px;
-            max-height: 120px;
+            min-height: 60px;
+            max-height: 150px;
+            font-family: inherit;
         }
 
         .chat-input:focus {
             outline: none;
             border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .input-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
 
         .send-btn {
-            padding: 15px 25px;
+            padding: 16px 20px;
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             cursor: pointer;
             transition: all 0.3s ease;
             font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 100px;
+            justify-content: center;
         }
 
-        .send-btn:hover {
+        .send-btn:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
         }
 
         .send-btn:disabled {
@@ -156,45 +330,186 @@
             transform: none;
         }
 
+        .voice-btn {
+            padding: 16px;
+            background: rgba(102, 126, 234, 0.1);
+            border: 2px solid #667eea;
+            color: #667eea;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .voice-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
         .typing-indicator {
             display: none;
             text-align: center;
-            color: #666;
+            color: #667eea;
             font-style: italic;
-            margin: 10px 0;
+            margin: 15px 0;
+            font-weight: 500;
+        }
+
+        .typing-indicator.show {
+            display: block;
+        }
+
+        .suggestions-container {
+            margin-bottom: 20px;
         }
 
         .suggestions {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
-            margin-bottom: 20px;
         }
 
         .suggestion-chip {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.25);
             color: white;
-            padding: 8px 15px;
-            border-radius: 20px;
+            padding: 10px 16px;
+            border-radius: 25px;
             cursor: pointer;
             transition: all 0.3s ease;
-            border: none;
+            border: 2px solid rgba(255,255,255,0.3);
             font-size: 14px;
+            font-weight: 500;
         }
 
         .suggestion-chip:hover {
-            background: rgba(255,255,255,0.3);
-            transform: translateY(-1px);
+            background: rgba(255,255,255,0.35);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .daily-tip {
+            background: linear-gradient(135deg, #60a5fa, #3b82f6);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .daily-tip h4 {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stats-card {
+            background: linear-gradient(135deg, #f3f4f6, #ffffff);
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .stats-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stats-label {
+            font-size: 0.9rem;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            display: none;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .search-result-item {
+            padding: 12px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .search-result-item:hover {
+            background: #f3f4f6;
+        }
+
+        .search-result-item:last-child {
+            border-bottom: none;
         }
 
         @keyframes slideIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { 
+                opacity: 0; 
+                transform: translateY(20px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .loading-dots {
+            display: inline-block;
+        }
+
+        .loading-dots::after {
+            content: "";
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: ""; }
+            40% { content: "."; }
+            60% { content: ".."; }
+            80%, 100% { content: "..."; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .main-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                flex-direction: row;
+                overflow-x: auto;
+            }
+            
+            .sidebar-card {
+                min-width: 280px;
+            }
         }
 
         @media (max-width: 768px) {
-            .chat-container {
+            .main-container {
                 padding: 10px;
+            }
+            
+            .sidebar {
+                flex-direction: column;
+            }
+            
+            .sidebar-card {
+                min-width: auto;
             }
             
             .message.user {
@@ -204,172 +519,644 @@
             .message.ai {
                 margin-right: 20px;
             }
+            
+            .input-actions {
+                flex-direction: row;
+            }
+        }
+
+        /* Scrollbar personalizado */
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
+        }
+
+        .medication-info {
+            background: #f0f9ff;
+            border: 2px solid #0ea5e9;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        .error-message {
+            background: #fef2f2;
+            border: 2px solid #ef4444;
+            color: #dc2626;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1><i class="fas fa-comments"></i> Chat Médico IA</h1>
-        <button class="nav-btn" onclick="location.href='/'">
-            <i class="fas fa-home"></i> Inicio
-        </button>
-    </div>
-
-    <div class="chat-container">
-        <div class="suggestions">
-            <button class="suggestion-chip" onclick="enviarSugerencia('Tengo dolor de cabeza desde esta mañana')">
-                💊 Dolor de cabeza
+        <h1>
+            <i class="fas fa-robot"></i> 
+            MediCare AI 
+            <span class="version-badge">v2.0</span>
+        </h1>
+        <div style="display: flex; gap: 10px;">
+            <button class="nav-btn" onclick="location.href='/medicamentos'">
+                <i class="fas fa-pills"></i> Medicamentos
             </button>
-            <button class="suggestion-chip" onclick="enviarSugerencia('Me siento con fiebre y cansancio')">
-                🌡️ Fiebre y cansancio
+            <button class="nav-btn" onclick="location.href='/historial'">
+                <i class="fas fa-history"></i> Historial
             </button>
-            <button class="suggestion-chip" onclick="enviarSugerencia('Tengo problemas para dormir')">
-                😴 Problemas de sueño
-            </button>
-            <button class="suggestion-chip" onclick="enviarSugerencia('Siento dolor en las articulaciones')">
-                🦴 Dolor articular
+            <button class="nav-btn" onclick="location.href='/'">
+                <i class="fas fa-home"></i> Inicio
             </button>
         </div>
+    </div>
 
-        <div class="chat-messages" id="chatMessages">
-            <div class="message ai">
-                <div class="message-header">
-                    <i class="fas fa-robot"></i> MediCare AI
+    <div class="suggestions-container" style="max-width: 1200px; margin: 0 auto; padding: 20px 20px 0;">
+        <div class="suggestions">
+            <div class="suggestion-chip" onclick="askSuggestion('Tengo dolor de cabeza y mareos')">
+                💊 Dolor de cabeza con mareos
+            </div>
+            <div class="suggestion-chip" onclick="askSuggestion('Siento náuseas y malestar estomacal')">
+                🤢 Náuseas y malestar
+            </div>
+            <div class="suggestion-chip" onclick="askSuggestion('Tengo fiebre y dolor de garganta')">
+                🌡️ Fiebre y dolor de garganta
+            </div>
+            <div class="suggestion-chip" onclick="askSuggestion('Me duele la espalda baja')">
+                🦴 Dolor de espalda
+            </div>
+            <div class="suggestion-chip" onclick="askSuggestion('Tengo tos seca persistente')">
+                😷 Tos persistente
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="sidebar">
+            <div class="sidebar-card">
+                <div class="daily-tip" id="dailyTip">
+                    <h4><i class="fas fa-lightbulb"></i> Consejo del Día</h4>
+                    <p>Cargando consejo de salud...</p>
                 </div>
-                <div>¡Hola! Soy tu asistente médico inteligente. Puedo ayudarte a analizar tus síntomas y ofrecerte orientación médica básica. 
-                
-                <br><br><strong>⚠️ Importante:</strong> Mis consejos no reemplazan la consulta médica profesional. Si tienes una emergencia, llama al 911 inmediatamente.
-                
-                <br><br>¿Cómo te sientes hoy? Describe tus síntomas...</div>
+            </div>
+            
+            <div class="sidebar-card">
+                <h3><i class="fas fa-search"></i> Buscar Síntomas</h3>
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" id="symptomSearch" 
+                           placeholder="Busca un síntoma..." 
+                           onkeyup="searchSymptoms(this.value)">
+                    <div class="search-results" id="searchResults"></div>
+                </div>
+            </div>
+
+            <div class="sidebar-card">
+                <h3><i class="fas fa-tachometer-alt"></i> Síntomas Comunes</h3>
+                <div class="quick-symptoms" id="quickSymptoms">
+                    <!-- Los síntomas se cargarán dinámicamente -->
+                </div>
+            </div>
+
+            <div class="sidebar-card">
+                <h3><i class="fas fa-chart-bar"></i> Estadísticas</h3>
+                <div class="stats-card">
+                    <div class="stats-number" id="totalConsults">0</div>
+                    <div class="stats-label">Consultas Totales</div>
+                </div>
             </div>
         </div>
 
-        <div class="typing-indicator" id="typingIndicator">
-            <i class="fas fa-spinner fa-spin"></i> MediCare AI está escribiendo...
-        </div>
+        <div class="chat-container">
+            <div class="chat-messages" id="chatMessages">
+                <div class="message ai">
+                    <div class="message-header">
+                        <i class="fas fa-robot"></i> 
+                        MediCare AI v2.0 - Asistente Médico Avanzado
+                        <span class="confidence-badge">Sistema Listo</span>
+                    </div>
+                    <div class="message-content">
+                        ¡Hola! Soy tu asistente médico inteligente avanzado. Estoy aquí para ayudarte con:
 
-        <div class="chat-input-container">
-            <textarea 
-                id="chatInput" 
-                class="chat-input" 
-                placeholder="Describe tus síntomas aquí... Por ejemplo: 'Tengo dolor de cabeza y me siento mareado'"
-                onkeypress="manejarEnter(event)"
-            ></textarea>
-            <button class="send-btn" onclick="enviarMensaje()" id="sendBtn">
-                <i class="fas fa-paper-plane"></i>
-            </button>
+<strong>🔍 Análisis de Síntomas:</strong> Describe cualquier síntoma que sientas
+<strong>💊 Información de Medicamentos:</strong> Pregunta sobre medicamentos específicos
+<strong>🩺 Recomendaciones Médicas:</strong> Obtén consejos personalizados
+<strong>⚠️ Evaluación de Urgencia:</strong> Determino si necesitas atención inmediata
+<strong>📋 Seguimiento:</strong> Guardo tu historial para mejor atención
+
+<strong>¿Cómo puedo ayudarte hoy?</strong>
+
+<em>Nota: Este sistema proporciona orientación médica pero no reemplaza la consulta con un profesional de la salud.</em>
+                    </div>
+                </div>
+            </div>
+
+            <div class="typing-indicator" id="typingIndicator">
+                <i class="fas fa-robot"></i> MediCare AI está analizando<span class="loading-dots"></span>
+            </div>
+
+            <div class="chat-input-container">
+                <textarea 
+                    class="chat-input" 
+                    id="messageInput" 
+                    placeholder="Describe tus síntomas, pregunta sobre medicamentos o cualquier consulta médica..."
+                    onkeypress="handleKeyPress(event)"
+                ></textarea>
+                <div class="input-actions">
+                    <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                        <i class="fas fa-paper-plane"></i> Enviar
+                    </button>
+                    <button class="voice-btn" onclick="toggleVoiceInput()">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        let conversacionActiva = false;
+        // Variables globales
+        let isProcessing = false;
+        let symptoms = [];
+        let consultCount = 0;
 
-        function enviarSugerencia(texto) {
-            document.getElementById('chatInput').value = texto;
-            enviarMensaje();
-        }
+        // Inicializar la aplicación
+        document.addEventListener('DOMContentLoaded', function() {
+            loadQuickSymptoms();
+            loadDailyTip();
+            loadStats();
+            focusInput();
+        });
 
-        function manejarEnter(event) {
-            if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                enviarMensaje();
+        // Cargar síntomas comunes
+        async function loadQuickSymptoms() {
+            try {
+                const response = await fetch('/api/sintomas_comunes');
+                const data = await response.json();
+                symptoms = data;
+                
+                const container = document.getElementById('quickSymptoms');
+                container.innerHTML = '';
+                
+                data.slice(0, 8).forEach(symptom => {
+                    const btn = document.createElement('button');
+                    btn.className = 'symptom-btn';
+                    btn.onclick = () => selectSymptom(symptom.nombre);
+                    
+                    btn.innerHTML = `
+                        <i class="fas fa-stethoscope"></i>
+                        ${symptom.nombre}
+                        <div class="urgency-indicator urgency-${symptom.urgencia}"></div>
+                    `;
+                    
+                    container.appendChild(btn);
+                });
+            } catch (error) {
+                console.error('Error cargando síntomas:', error);
             }
         }
 
-        function enviarMensaje() {
-            const input = document.getElementById('chatInput');
-            const mensaje = input.value.trim();
-            
-            if (!mensaje || conversacionActiva) return;
+        // Cargar consejo del día
+        async function loadDailyTip() {
+            try {
+                const response = await fetch('/api/consejo_dia');
+                const data = await response.json();
+                
+                document.getElementById('dailyTip').innerHTML = `
+                    <h4><i class="fas fa-lightbulb"></i> Consejo del Día</h4>
+                    <p>${data.consejo}</p>
+                `;
+            } catch (error) {
+                document.getElementById('dailyTip').innerHTML = `
+                    <h4><i class="fas fa-lightbulb"></i> Consejo del Día</h4>
+                    <p>💧 Mantente hidratado: bebe al menos 8 vasos de agua al día</p>
+                `;
+            }
+        }
 
-            // Agregar mensaje del usuario
-            agregarMensaje(mensaje, 'user');
+        // Cargar estadísticas
+        function loadStats() {
+            const stored = localStorage.getItem('medicareConsults');
+            if (stored) {
+                consultCount = parseInt(stored);
+                document.getElementById('totalConsults').textContent = consultCount;
+            }
+        }
+
+        // Actualizar estadísticas
+        function updateStats() {
+            consultCount++;
+            localStorage.setItem('medicareConsults', consultCount.toString());
+            document.getElementById('totalConsults').textContent = consultCount;
+        }
+
+        // Buscar síntomas
+        function searchSymptoms(query) {
+            const results = document.getElementById('searchResults');
+            
+            if (!query.trim()) {
+                results.style.display = 'none';
+                return;
+            }
+
+            const filtered = symptoms.filter(s => 
+                s.nombre.toLowerCase().includes(query.toLowerCase()) ||
+                s.clave.toLowerCase().includes(query.toLowerCase())
+            );
+
+            if (filtered.length > 0) {
+                results.innerHTML = filtered.map(s => `
+                    <div class="search-result-item" onclick="selectSymptomFromSearch('${s.nombre}')">
+                        <strong>${s.nombre}</strong>
+                        <div style="font-size: 0.8rem; color: #6b7280;">
+                            Urgencia: <span class="urgency-${s.urgencia}">${s.urgencia}</span>
+                        </div>
+                    </div>
+                `).join('');
+                results.style.display = 'block';
+            } else {
+                results.innerHTML = '<div class="search-result-item">No se encontraron síntomas</div>';
+                results.style.display = 'block';
+            }
+        }
+
+        // Seleccionar síntoma desde búsqueda
+        function selectSymptomFromSearch(symptomName) {
+            document.getElementById('messageInput').value = `Tengo ${symptomName.toLowerCase()}`;
+            document.getElementById('searchResults').style.display = 'none';
+            document.getElementById('symptomSearch').value = '';
+            focusInput();
+        }
+
+        // Seleccionar síntoma rápido
+        function selectSymptom(symptomName) {
+            document.getElementById('messageInput').value = `Tengo ${symptomName.toLowerCase()}`;
+            focusInput();
+        }
+
+        // Sugerencia rápida
+        function askSuggestion(suggestion) {
+            document.getElementById('messageInput').value = suggestion;
+            sendMessage();
+        }
+
+        // Enfocar input
+        function focusInput() {
+            document.getElementById('messageInput').focus();
+        }
+
+        // Manejar teclas
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        // Enviar mensaje
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message || isProcessing) return;
+            
+            // Mostrar mensaje del usuario
+            addMessage('user', message);
+            
+            // Limpiar input
             input.value = '';
             
             // Mostrar indicador de escritura
-            mostrarTyping(true);
-            conversacionActiva = true;
-            document.getElementById('sendBtn').disabled = true;
-
-            // Enviar a la API
-            fetch('/api/consulta', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ sintomas: mensaje })
-            })
-            .then(response => response.json())
-            .then(data => {
-                mostrarTyping(false);
+            showTypingIndicator();
+            
+            // Deshabilitar botón
+            setButtonState(true);
+            
+            try {
+                // Enviar consulta al backend
+                const response = await fetch('/api/consulta', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ sintomas: message })
+                });
                 
-                if (data.error) {
-                    agregarMensaje('Lo siento, ocurrió un error. Por favor intenta de nuevo.', 'ai', 'baja');
+                if (!response.ok) {
+                    throw new Error(`Error ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                // Ocultar indicador
+                hideTypingIndicator();
+                
+                // Mostrar respuesta
+                addMessage('ai', data.respuesta, data.urgencia, data.confianza);
+                
+                // Actualizar estadísticas
+                updateStats();
+                
+            } catch (error) {
+                hideTypingIndicator();
+                addMessage('ai', `❌ Error: No pude procesar tu consulta. ${error.message}`, 'alta', 0);
+            } finally {
+                setButtonState(false);
+                focusInput();
+            }
+        }
+
+        // Agregar mensaje al chat
+        function addMessage(sender, content, urgency = null, confidence = null) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            
+            let messageClass = `message ${sender}`;
+            if (sender === 'ai' && urgency) {
+                if (urgency === 'alta') messageClass += ' urgent';
+                else if (urgency === 'media') messageClass += ' warning';
+            }
+            
+            messageDiv.className = messageClass;
+            
+            if (sender === 'user') {
+                messageDiv.innerHTML = `
+                    <div class="message-header">
+                        <i class="fas fa-user"></i> Tú
+                    </div>
+                    <div class="message-content">${content}</div>
+                `;
+            } else {
+                const confidenceBadge = confidence ? 
+                    `<span class="confidence-badge">Confianza: ${Math.round(confidence * 100)}%</span>` : '';
+                
+                const urgencyBadge = urgency ? 
+                    `<span class="urgency-badge urgency-${urgency}-badge">${urgency}</span>` : '';
+                
+                messageDiv.innerHTML = `
+                    <div class="message-header">
+                        <i class="fas fa-robot"></i> MediCare AI
+                        ${urgencyBadge}
+                        ${confidenceBadge}
+                    </div>
+                    <div class="message-content">${content}</div>
+                `;
+            }
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Mostrar indicador de escritura
+        function showTypingIndicator() {
+            document.getElementById('typingIndicator').classList.add('show');
+            isProcessing = true;
+        }
+
+        // Ocultar indicador de escritura
+        function hideTypingIndicator() {
+            document.getElementById('typingIndicator').classList.remove('show');
+            isProcessing = false;
+        }
+
+        // Controlar estado del botón
+        function setButtonState(disabled) {
+            const btn = document.getElementById('sendBtn');
+            btn.disabled = disabled;
+            
+            if (disabled) {
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando';
+            } else {
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar';
+            }
+        }
+
+        // Función de voz (placeholder)
+        function toggleVoiceInput() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                const recognition = new SpeechRecognition();
+                
+                recognition.lang = 'es-ES';
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                
+                recognition.onstart = function() {
+                    document.querySelector('.voice-btn i').className = 'fas fa-stop';
+                };
+                
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    document.getElementById('messageInput').value = transcript;
+                    document.querySelector('.voice-btn i').className = 'fas fa-microphone';
+                };
+                
+                recognition.onerror = function(event) {
+                    console.error('Error de reconocimiento de voz:', event.error);
+                    document.querySelector('.voice-btn i').className = 'fas fa-microphone';
+                    addMessage('ai', '❌ Error: No pude acceder al micrófono. Por favor, verifica los permisos.', 'media', 0);
+                };
+                
+                recognition.onend = function() {
+                    document.querySelector('.voice-btn i').className = 'fas fa-microphone';
+                };
+                
+                recognition.start();
+            } else {
+                addMessage('ai', '❌ Error: Tu navegador no soporta reconocimiento de voz. Puedes escribir tu consulta.', 'baja', 0);
+            }
+        }
+
+        // Buscar información de medicamento
+        async function searchMedication(medicationName) {
+            try {
+                const response = await fetch(`/api/medicamento/${encodeURIComponent(medicationName)}`);
+                const data = await response.json();
+                
+                if (data.encontrado) {
+                    const info = data.informacion;
+                    return `
+<strong>💊 INFORMACIÓN DEL MEDICAMENTO: ${data.nombre}</strong>
+
+<strong>🎯 Usos Principales:</strong> ${info.usos.join(', ')}
+
+<strong>💉 Dosis Recomendada:</strong> ${info.dosis_adulto}
+
+<strong>⚠️ Precauciones:</strong>
+${info.precauciones.map(p => `• ${p}`).join('\n')}
+
+<strong>🔍 Posibles Efectos Secundarios:</strong>
+${info.efectos_secundarios.map(e => `• ${e}`).join('\n')}
+
+<strong>📝 Nota:</strong> Esta información es orientativa. Siempre consulta con un farmacéutico o médico para uso específico.
+                    `;
                 } else {
-                    agregarMensaje(data.respuesta, 'ai', data.urgencia);
+                    return `❌ No encontré información específica sobre "${medicationName}". Te recomiendo consultar con un farmacéutico o médico.`;
+                }
+            } catch (error) {
+                return `❌ Error al buscar información del medicamento. Intenta nuevamente.`;
+            }
+        }
+
+        // Detectar consultas sobre medicamentos
+        function isMedicationQuery(message) {
+            const medicationKeywords = ['medicamento', 'medicina', 'pastilla', 'tableta', 'jarabe', 'capsula', 'ibuprofeno', 'acetaminofen', 'aspirina', 'omeprazol', 'paracetamol'];
+            return medicationKeywords.some(keyword => message.toLowerCase().includes(keyword));
+        }
+
+        // Función mejorada para enviar mensaje con detección de medicamentos
+        async function sendMessageAdvanced() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message || isProcessing) return;
+            
+            addMessage('user', message);
+            input.value = '';
+            showTypingIndicator();
+            setButtonState(true);
+            
+            try {
+                // Verificar si es consulta sobre medicamento
+                if (isMedicationQuery(message)) {
+                    // Extraer nombre del medicamento (simplificado)
+                    const words = message.toLowerCase().split(' ');
+                    const medicationKeywords = ['ibuprofeno', 'acetaminofen', 'aspirina', 'omeprazol', 'paracetamol'];
+                    const foundMed = medicationKeywords.find(med => words.includes(med));
                     
-                    // Agregar sugerencias de seguimiento si es necesario
-                    if (data.urgencia === 'alta') {
-                        setTimeout(() => {
-                            agregarMensaje('🚨 RECOMENDACIÓN URGENTE: Debido a la naturaleza de tus síntomas, te recomiendo encarecidamente buscar atención médica inmediata o llamar al 911.', 'ai', 'alta');
-                        }, 1000);
+                    if (foundMed) {
+                        hideTypingIndicator();
+                        const medInfo = await searchMedication(foundMed);
+                        addMessage('ai', medInfo, 'baja', 0.9);
+                        setButtonState(false);
+                        updateStats();
+                        focusInput();
+                        return;
                     }
                 }
                 
-                conversacionActiva = false;
-                document.getElementById('sendBtn').disabled = false;
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                mostrarTyping(false);
-                agregarMensaje('Lo siento, no pude procesar tu consulta. Verifica tu conexión e intenta de nuevo.', 'ai', 'baja');
-                conversacionActiva = false;
-                document.getElementById('sendBtn').disabled = false;
-            });
-        }
-
-        function agregarMensaje(texto, tipo, urgencia = null) {
-            const chatMessages = document.getElementById('chatMessages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${tipo}`;
-            
-            let header = '';
-            if (tipo === 'user') {
-                header = '<div class="message-header"><i class="fas fa-user"></i> Tú</div>';
-            } else {
-                let urgencyIndicator = '';
-                if (urgencia) {
-                    const urgencyLabels = {
-                        'baja': '✅ Normal',
-                        'media': '⚠️ Atención',
-                        'alta': '🚨 Urgente'
-                    };
-                    urgencyIndicator = `<span class="urgency-indicator urgency-${urgencia}">${urgencyLabels[urgencia]}</span>`;
+                // Consulta médica normal
+                const response = await fetch('/api/consulta', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sintomas: message })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Error ${response.status}: ${response.statusText}`);
                 }
-                header = `<div class="message-header"><i class="fas fa-robot"></i> MediCare AI ${urgencyIndicator}</div>`;
-            }
-            
-            messageDiv.innerHTML = `${header}<div>${texto}</div>`;
-            chatMessages.appendChild(messageDiv);
-            
-            // Scroll al final
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        function mostrarTyping(mostrar) {
-            const typingIndicator = document.getElementById('typingIndicator');
-            typingIndicator.style.display = mostrar ? 'block' : 'none';
-            
-            if (mostrar) {
-                const chatMessages = document.getElementById('chatMessages');
-                chatMessages.scrollTop = chatMessages.scrollHeight;
+                
+                const data = await response.json();
+                hideTypingIndicator();
+                addMessage('ai', data.respuesta, data.urgencia, data.confianza);
+                updateStats();
+                
+            } catch (error) {
+                hideTypingIndicator();
+                addMessage('ai', `❌ Error: No pude procesar tu consulta. ${error.message}`, 'alta', 0);
+            } finally {
+                setButtonState(false);
+                focusInput();
             }
         }
 
-        // Auto-focus en el input
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('chatInput').focus();
+        // Reemplazar función sendMessage original
+        sendMessage = sendMessageAdvanced;
+
+        // Ocultar resultados de búsqueda al hacer clic fuera
+        document.addEventListener('click', function(event) {
+            const searchBox = document.querySelector('.search-box');
+            const searchResults = document.getElementById('searchResults');
+            
+            if (!searchBox.contains(event.target)) {
+                searchResults.style.display = 'none';
+            }
         });
+
+        // Auto-resize del textarea
+        document.getElementById('messageInput').addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+        });
+
+        
+        // Función para generar reporte rápido
+        async function generateQuickReport() {
+            try {
+                showTypingIndicator();
+                const response = await fetch('/api/generar_reporte', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ periodo: '7' })
+                });
+                
+                const data = await response.json();
+                hideTypingIndicator();
+                
+                addMessage('ai', data.reporte, 'baja', 1.0);
+                
+            } catch (error) {
+                hideTypingIndicator();
+                addMessage('ai', '❌ Error al generar reporte. Intenta nuevamente.', 'media', 0);
+            }
+        }
+
+        // Atajos de teclado
+        document.addEventListener('keydown', function(event) {
+            if (event.ctrlKey || event.metaKey) {
+                switch(event.key) {
+                    case 'r':
+                        event.preventDefault();
+                        generateQuickReport();
+                        break;
+                    case 'l':
+                        event.preventDefault();
+                        document.getElementById('chatMessages').innerHTML = '';
+                        addMessage('ai', 'Chat reiniciado. ¿En qué puedo ayudarte?', 'baja', 1.0);
+                        break;
+                }
+            }
+        });
+
+        // Notificaciones de urgencia
+        function showUrgentNotification(message) {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification('MediCare AI - Urgente', {
+                    body: message,
+                    icon: '/static/icon.png',
+                    tag: 'urgent-health'
+                });
+            }
+        }
+
+        // Solicitar permisos de notificación
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+
+        // Función para manejar respuestas urgentes
+        function handleUrgentResponse(urgency, content) {
+            if (urgency === 'alta') {
+                showUrgentNotification('Consulta médica urgente detectada');
+                // Agregar sonido de alerta si es necesario
+                const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DvwG0eAjB+z/LLfyqeAB');
+                audio.play().catch(() => {}); // Ignorar errores de audio
+            }
+        }
+
+        console.log('🚀 MediCare AI v2.0 Chat Interface cargado exitosamente');
+        console.log('💡 Atajos disponibles: Ctrl+R (Reporte), Ctrl+L (Limpiar chat)');
     </script>
 </body>
 </html>
