@@ -356,13 +356,13 @@ def test():
     """Ruta de prueba"""
     return jsonify({
         'status': 'success', 
-        'message': '🎉 MediCare AI funcionando correctamente!',
+        'message': ' MediCare AI funcionando correctamente!',
         'timestamp': datetime.now().isoformat()
     })
 
 if __name__ == '__main__':
-    print("🚀 Iniciando MediCare AI...")
-    print("📝 Configurando base de datos...")
-    print("✅ ¡Aplicación lista!")
-    print("🌐 Accede a: http://localhost:5000")
+    print("Iniciando MediCare AI...")
+    print("Configurando base de datos...")
+    print("¡Aplicación lista!")
+    print("Accede a: http://localhost:5000")
     app.run(debug=True, port=5000)
