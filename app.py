@@ -6,6 +6,8 @@ import json
 
 app = Flask(__name__)
 app.secret_key = 'medicare_ai_secret_key_2024'
+app.secret_key = "clave_fija"
+app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///medicare.db"
 
 class MediCareAI:
     def __init__(self):
