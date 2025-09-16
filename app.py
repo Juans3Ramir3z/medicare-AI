@@ -48,34 +48,101 @@ class MediCareAI:
         
         conn.commit()
         conn.close()
-        print("✅ Base de datos inicializada correctamente")
+        print("Base de datos inicializada correctamente")
     
     def generar_respuesta_medica(self, sintomas, historial=None):
         """Generar respuesta médica usando IA (simulada por ahora)"""
         
         # Simulación de IA - Respuestas inteligentes basadas en palabras clave
         respuestas_base = {
-            "dolor de cabeza": {
-                "respuesta": "El dolor de cabeza puede tener múltiples causas. Te recomiendo: 1) Descansar en un lugar tranquilo y oscuro, 2) Aplicar compresas frías en la frente, 3) Mantenerte bien hidratado, 4) Evitar ruidos fuertes. Si el dolor persiste más de 24 horas o es muy intenso, consulta a un médico.",
-                "urgencia": "baja"
-            },
-            "fiebre": {
-                "respuesta": "La fiebre es una respuesta natural del cuerpo a infecciones. Recomendaciones: 1) Mantente bien hidratado con líquidos, 2) Descansa en cama, 3) Usa ropa ligera, 4) Aplica compresas tibias si es necesario. Si la fiebre supera 38.5°C o dura más de 3 días, busca atención médica.",
-                "urgencia": "media"
-            },
-            "dolor de pecho": {
-                "respuesta": "⚠️ El dolor de pecho puede ser serio y requiere atención médica inmediata. Por favor: 1) Busca atención médica urgente AHORA, 2) No conduzcas, pide que te lleven al hospital, 3) Mantente calmado, 4) Si tienes medicamentos cardíacos prescritos, tómalos según las indicaciones de tu médico.",
-                "urgencia": "alta"
-            },
-            "mareo": {
-                "respuesta": "Los mareos pueden ser causados por varias razones. Te sugiero: 1) Siéntate o acuéstate inmediatamente, 2) Mantente hidratado, 3) Evita movimientos bruscos, 4) Verifica si has comido recientemente. Si los mareos son frecuentes o severos, consulta con tu médico.",
-                "urgencia": "baja"
-            },
-            "dificultad respirar": {
-                "respuesta": "⚠️ La dificultad para respirar puede ser seria. Acciones inmediatas: 1) Busca atención médica urgente, 2) Siéntate en posición erguida, 3) Mantente calmado, 4) Si tienes inhalador, úsalo según prescripción. No esperes, busca ayuda médica ahora.",
-                "urgencia": "alta"
-            }
-        }
+           "dolor de cabeza": {
+        "respuesta": "El dolor de cabeza puede tener múltiples causas. Te recomiendo: 1) Descansar en un lugar tranquilo y oscuro, 2) Aplicar compresas frías en la frente, 3) Mantenerte bien hidratado, 4) Evitar ruidos fuertes. Si el dolor persiste más de 24 horas o es muy intenso, consulta a un médico.",
+        "urgencia": "baja",
+        "variantes": ["jaqueca", "me duele la cabeza", "migraña"]
+    },
+    "fiebre": {
+        "respuesta": "La fiebre es una respuesta natural del cuerpo a infecciones. Recomendaciones: 1) Mantente bien hidratado con líquidos, 2) Descansa en cama, 3) Usa ropa ligera, 4) Aplica compresas tibias si es necesario. Si la fiebre supera 38.5°C o dura más de 3 días, busca atención médica.",
+        "urgencia": "media",
+        "variantes": ["calentura", "temperatura alta", "me siento caliente"]
+    },
+    "dolor de pecho": {
+        "respuesta": "El dolor de pecho puede ser serio y requiere atención médica inmediata. Por favor: 1) Busca atención médica urgente AHORA, 2) No conduzcas, pide que te lleven al hospital, 3) Mantente calmado, 4) Si tienes medicamentos cardíacos prescritos, tómalos según indicación médica.",
+        "urgencia": "alta",
+        "variantes": ["punzada en el pecho", "me aprieta el corazón", "presión en el pecho"]
+    },
+    "mareo": {
+        "respuesta": "Los mareos pueden ser causados por varias razones. Te sugiero: 1) Siéntate o acuéstate inmediatamente, 2) Mantente hidratado, 3) Evita movimientos bruscos, 4) Verifica si has comido recientemente. Si los mareos son frecuentes o severos, consulta con tu médico.",
+        "urgencia": "baja",
+        "variantes": ["vértigo", "me siento mareado", "se me va la cabeza"]
+    },
+    "dificultad para respirar": {
+        "respuesta": "La dificultad para respirar puede ser seria. Acciones inmediatas: 1) Busca atención médica urgente, 2) Siéntate en posición erguida, 3) Mantente calmado, 4) Si tienes inhalador, úsalo según prescripción. No esperes, busca ayuda médica ahora.",
+        "urgencia": "alta",
+        "variantes": ["me falta el aire", "no puedo respirar", "sofoco"]
+    },
+    "dolor de estómago": {
+        "respuesta": "El dolor de estómago puede deberse a comida pesada, gases o infecciones. Recomendaciones: 1) Descansa, 2) Bebe agua o infusiones suaves (manzanilla), 3) Evita comidas grasosas, 4) Si el dolor es muy fuerte o viene con vómitos persistentes, consulta un médico.",
+        "urgencia": "baja",
+        "variantes": ["dolor de barriga", "retorcijón", "me duele la panza"]
+    },
+    "gripa": {
+        "respuesta": "La gripa suele ser viral y mejora sola en unos días. Recomendaciones: 1) Descansa, 2) Mantente hidratado, 3) Usa pañuelos y lava tus manos, 4) Si dura más de 10 días o empeora, consulta al médico.",
+        "urgencia": "baja",
+        "variantes": ["resfriado", "gripe", "estoy agripado"]
+    },
+    "tos": {
+        "respuesta": "La tos puede ser causada por infecciones respiratorias, alergias o irritaciones. 1) Mantente hidratado, 2) Evita humo o polvo, 3) Toma miel tibia si no eres diabético, 4) Si es con sangre o dura más de 2 semanas, busca atención médica.",
+        "urgencia": "media",
+        "variantes": ["tos seca", "tos con flema", "estoy tosiendo mucho"]
+    },
+    "dolor de articulaciones": {
+        "respuesta": "El dolor en las articulaciones puede deberse a desgaste, artritis o sobreesfuerzo. 1) Descansa la zona, 2) Aplica calor o frío, 3) Evita movimientos bruscos, 4) Si se hincha mucho o no puedes moverla, consulta al médico.",
+        "urgencia": "baja",
+        "variantes": ["me duelen las rodillas", "dolor en las coyunturas", "me duelen los huesos"]
+    },
+    "hinchazon piernas": {
+        "respuesta": "La hinchazón en las piernas puede ser por retención de líquidos, problemas circulatorios o exceso de estar de pie. 1) Eleva las piernas, 2) Evita estar mucho tiempo sentado o parado, 3) Reduce la sal. Si aparece de repente y con dolor, consulta de inmediato.",
+        "urgencia": "media",
+        "variantes": ["tengo las piernas hinchadas", "tengo los pies como globos", "me duelen las canillas"]
+    },
+    "dolor de espalda": {
+        "respuesta": "El dolor de espalda es común por malas posturas o esfuerzos. 1) Descansa en una superficie firme, 2) Aplica calor, 3) Haz estiramientos suaves, 4) Si el dolor baja a las piernas o no mejora en una semana, consulta al médico.",
+        "urgencia": "baja",
+        "variantes": ["dolor en la cintura", "dolor en los riñones", "me duele la espalda baja"]
+    },
+    "diarrea": {
+        "respuesta": "La diarrea puede ser por infección o comida en mal estado. 1) Bebe sueros de rehidratación, 2) Evita lácteos y comidas grasosas, 3) Descansa. Si dura más de 2 días, hay sangre o deshidratación, busca atención médica.",
+        "urgencia": "media",
+        "variantes": ["voy mucho al baño", "estoy flojo del estómago", "estoy suelto"]
+    },
+    "estreñimiento": {
+        "respuesta": "El estreñimiento es común y suele mejorar con cambios de hábitos. 1) Bebe más agua, 2) Come frutas y fibra, 3) Haz ejercicio. Si dura más de 1 semana o hay dolor fuerte, consulta al médico.",
+        "urgencia": "baja",
+        "variantes": ["no puedo ir al baño", "estoy tapado", "no hago del cuerpo"]
+    },
+    "nauseas": {
+        "respuesta": "Las náuseas pueden tener muchas causas. 1) Evita olores fuertes, 2) Come algo suave, 3) Mantente hidratado. Si es constante y con vómitos frecuentes, consulta al médico.",
+        "urgencia": "baja",
+        "variantes": ["ganas de vomitar", "asco", "revuelto el estómago"]
+    },
+    "dolor de garganta": {
+        "respuesta": "El dolor de garganta puede ser por infecciones o irritaciones. 1) Bebe líquidos tibios, 2) Haz gárgaras con agua salada, 3) Evita fumar. Si hay placas blancas o fiebre alta, consulta al médico.",
+        "urgencia": "media",
+        "variantes": ["ardor de garganta", "rasquiña en la garganta", "me arde al tragar"]
+    },
+    "vomito": {
+        "respuesta": "El vómito puede ser por infecciones o indigestión. 1) Descansa, 2) Bebe sorbos pequeños de agua, 3) Evita comidas pesadas. Si es con sangre o muy frecuente, busca ayuda médica.",
+        "urgencia": "media",
+        "variantes": ["echar la comida", "devolver lo comido", "vomité"]
+    },
+    "dolor de muela": {
+        "respuesta": "El dolor de muela suele ser por caries o infección. 1) Enjuágate con agua tibia y sal, 2) Evita comer cosas muy duras, 3) Toma analgésico si lo tienes indicado. Si el dolor es fuerte o hay hinchazón en la cara, consulta al odontólogo.",
+        "urgencia": "media",
+        "variantes": ["me duele la muela", "dolor de diente", "muela picada"]
+    }
+}
+            
+
         
         # Buscar síntomas clave en el texto
         sintomas_lower = sintomas.lower()
